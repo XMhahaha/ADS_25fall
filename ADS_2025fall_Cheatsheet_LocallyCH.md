@@ -40,7 +40,7 @@ def bisect_nonstrict_first(a, key):
 ### 1.1.2 寻找arr中从左往右最后一个使得key函数值<x（或<=x）的元素
 
 ```python
-#寻找第一个使key值>x的元素，返回a中下标
+#寻找最后一个使key值<x的元素，返回a中下标
 #若无满足条件的下标，返回-1
 def bisect_strict_last(a, key):
 	lo, hi = -1, len(a) - 1
@@ -52,7 +52,7 @@ def bisect_strict_last(a, key):
 			hi = mid - 1
 	return hi
 	
-#寻找第一个使key值>=x的元素，返回a中下标
+#寻找最后一个使key值《=x的元素，返回a中下标
 #若无满足条件的下标，返回-1
 def bisect_nonstrict_last(a, key):
 	lo, hi = -1, len(a) - 1
