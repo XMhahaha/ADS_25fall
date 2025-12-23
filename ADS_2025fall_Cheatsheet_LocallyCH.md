@@ -1,6 +1,14 @@
 ## **==认真读题==**
 ## **==留意变量范围，考虑算法的时间复杂度是否够用==**
 
+## Pycharm 调试快捷键
+
+单步跳过：F8
+步入函数：F7
+跳出当前函数：Shift + F8
+运行到光标处：Alt + F9
+继续执行：F9
+
 # 0 少量语法
 
 ## 0.1 输入输出
@@ -156,7 +164,7 @@ while True:
 
 ###  1.3.1 一种双指针的简单用法
 
-双指针可以减少很多无效的暴力枚举。有时可以用for循环来起到快指针的作用，例如（题目为Leetcode 283: 移动零）：
+双指针可以减少很多无效的暴力枚举。有时可以用for循环来起到快指针的作用，例如（题目为Leetcode 283. 移动零）：
 
 ```python
 class Solution:
@@ -171,7 +179,7 @@ class Solution:
 
 ### 1.3.2 滑动窗口
 
-一个较为清晰的写法如下（Leetcode 209: 长度最小的子数组）：
+一个较为清晰的写法如下（Leetcode 209. 长度最小的子数组）：
 
 ```python
 class Solution:
@@ -189,6 +197,85 @@ class Solution:
                 left+=1
         return minlen if minlen < size + 1 else 0
 ```
+
+## 1.4 栈的用法
+
+栈可以用来暂存一些数据，以待稍后使用。
+
+例：谢正茂老师班计概2025秋期末机考Q6T: 化学分子式
+（注意：为什么往栈中添加元素的时候先添加分子式前的字符？因为原子/原子团的个数在后面，我们处理到各个元素符号时是不知道个数的，只有得到后面的“个数”这个信息才能进行计算。所以从前往后入栈，遇到数字就能够把之前暂存的一些栈顶元素给清掉）
+（类似地，思考：波兰表达式和逆波兰表达式的入栈顺序应该是怎样的？）
+
+```python
+def extract(ls):#提取元素名称
+    if len(ls) >= 2 and ls[-2].islower():
+        return "".join(ls[-2:][::-1])
+    else:
+        return ls[-1]
+
+def encrypt(ls):#这个ls是反转的分子式字符列表（这么处理只是为了写起来方便）
+    stack = []
+    while ls:
+        if ls[-1] == '(':
+            stack.append(ls.pop())
+        elif ls[-1] == ')':
+            ls.pop()
+            helpsum = 0
+            while stack[-1] != '(':
+                helpsum += stack.pop()
+            stack.pop()
+            stack.append(helpsum)
+        elif not ls[-1].isdigit():
+            ele = extract(ls)
+            if len(ele) == 2:
+                ls.pop()
+                ls.pop()
+            else:
+                ls.pop()
+            stack.append(mydict[ele])
+        else:
+            helpstack = []
+            while ls and ls[-1].isdigit():
+                helpstack.append(ls.pop())
+            coef = int("".join(helpstack))
+            stack[-1] *= coef
+    return sum(stack)
+
+m, n = map(int, input().split())
+mydict = {}
+for _ in range(m):
+    element, mass = input().split()
+    mass = int(mass)
+    mydict[element] = mass
+for _ in range(n):
+    string = input().strip()
+    ls = [c for c in string]
+    print(encrypt(ls[::-1]))
+```
+
+### 1.4.1 单调栈
+
+对于与栈中元素原位置有关的问题，栈存下标一般是好的选择。例如Leetcode 85. 最大矩形：
+
+```python
+class Solution:
+    def maximalRectangle(self, matrix: List[List[str]]) -> int:
+        m, n = len(matrix), len(matrix[0])
+        heights = [0] * (n + 1)
+        maxarea = 0
+        for row in matrix:
+            for i, val in enumerate(row):
+                heights[i] = heights[i] + 1 if val== "1" else 0
+            stack = []
+            for i,height in enumerate(heights):
+                while stack and heights[stack[-1]] > height:
+                    p = stack.pop()
+                    width = i if not stack else i - stack[-1] - 1
+                    maxarea = max(maxarea, heights[p] * width)
+                stack.append(i)
+        return maxarea
+```
+
 
 # 2 递归
 
@@ -220,11 +307,34 @@ def backtracking(parameters):
 		return
 	for ... : #选择本层集合中的元素
 		#处理节点
-		backtracking(...) #参数一般为：路径，以及做过的选择的信息
+		backtracking(...) #参数一般会包含做过的选择的信息
 		#撤销处理结果
 ```
 
 记得考虑能否通过剪枝（去掉不可能的选择）来提高效率。
+
+例：sy134. 组合II
+
+```python
+n, k = map(int, input().split())
+ls = [int(x) for x in input().split()]
+  
+def dfs(k, start, path, res):
+    if len(path) == k:
+        res.append(path[:])
+        return
+    for i in range(start, n-(k-len(path))+1):#剪枝：过大的i不可能得到满足条件的组合
+        path.append(ls[i])
+        dfs(k, i+1, path, res)
+        path.pop()
+        
+res = []
+start = 0
+path = []
+dfs(k, start, path, res)
+for i in res:
+    print(*i)
+```
 
 # 3. DP
 
