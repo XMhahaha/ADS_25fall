@@ -43,6 +43,7 @@ for line in lines:
 可以参考1.2部分的并查集代码。
 
 
+
 # 1 若干值得一抄的常用技术/方法
 ## 1.1 二分查找：一类二分查找问题的通法
 
@@ -110,7 +111,7 @@ def bisect_nonstrict_last(a, key):
 	return hi
 ```
 
-# ## 1.2 并查集
+## 1.2 并查集
 
 基本用法可参考M02524: 宗教信仰 一题的代码：
 
@@ -191,6 +192,19 @@ class Solution:
 
 # 2 递归
 
+递归爆栈可考虑调整递归深度限制：
+
+```python
+import sys
+sys.setrecursionlimit(1<<30)
+```
+
+避免重复计算子问题：
+
+```python
+from functools import lru_cache
+@lru_cache(maxsize = None)
+```
 ## 2.1 回溯
 
 回溯算法的一般步骤如下面伪代码所示。需要注意以下几点：
@@ -214,6 +228,14 @@ def backtracking(parameters):
 
 # 3. DP
 
+注意以下步骤：
+
+- 确定dp数组以及下标的含义
+- 确定递推公式
+- dp数组如何初始化
+- 确定遍历顺序
+- 举例推导dp数组
+
 # 4. 简单图论
 
 ## 4.1 深度优先搜索
@@ -221,6 +243,40 @@ def backtracking(parameters):
 可以参考递归、回溯部分内容。
 
 ## 4.2 广度优先搜索
+
+例：M19930: 寻宝
+
+```python
+from collections import deque
+def move(x,y,pathlen):
+    direls = [(1,0),(0,1),(-1,0),(0,-1)]
+    res = []
+    for dire in direls:
+        tx,ty = x+dire[0],y+dire[1]
+        if 0<=tx<m and 0 <=ty < n and mat[tx][ty] != 2 and (tx,ty) not in searched:
+            res.append((tx,ty,pathlen+1))
+            searched.add((tx,ty))
+    return res
+m,n = map(int,input().split())
+mat = [[0]*n for _ in range(m)]
+searched = set()
+for row in range(m):
+    mat[row] = list(map(int,input().split()))
+route = deque()
+route.append((0,0,0))
+searched.add((0,0))
+while route:
+    pos = route.popleft()
+    route+=move(pos[0],pos[1],pos[2])
+    if mat[pos[0]][pos[1]] == 1:
+        print(pos[2])
+        break
+else:
+    print("NO")
+```
+
+当然，此题的visited用二维布尔数组亦可。
+
 
 ## 4.3 Dijkstra算法
 
